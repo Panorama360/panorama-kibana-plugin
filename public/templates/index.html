@@ -1,12 +1,36 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12-sm">
-            <h1>Elasticsearch Status</h1>
-            <ul class="indexList">
-                <li ng-repeat="index in ctrl.indices">
-                    <a href="#/index/{{index}}">{{ index }}</a>
-                </li>
-            </ul>
+<div class="panorama app-container" ng-controller="panorama">
+    <!-- Local nav. -->
+    <kbn-top-nav name="panorama" config="topNavMenu">
+        <!-- Transcluded elements. -->
+        <div data-transclude-slots>
+            <!-- Title. -->
+            <div data-transclude-slot="topLeftCorner"
+                 class="kuiLocalBreadcrumbs"
+                 data-test-subj="breadcrumbs"
+                 role="heading"
+                 aria-level="1">
+                <div class="kuiLocalBreadcrumb">
+                    <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Panorama 360</a>
+                </div>
+                <div class="kuiLocalBreadcrumb">
+                    {{ getWorkflowTitle() }}
+                </div>
+            </div>
         </div>
-    </div>
+    </kbn-top-nav>
+
+    <main class="container-fluid">
+        <div class="page-row">
+            <div class="kuiPanel management-panel">
+                <div class="kuiPanelHeader">
+                    <div class="kuiPanelHeaderSection">
+                        <div class="form-group">
+                            <label for="workflow">Workflow:</label>
+                            <select ng-model="vis.params.allowBlank" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>

@@ -1,25 +1,25 @@
-import api from './server/routes';
-
 export default function (kibana) {
     return new kibana.Plugin({
-        require: ['elasticsearch'],
+        id: 'panorama',
+        name: 'panorama',
+
+        require: ['kibana', 'elasticsearch'],
 
         uiExports: {
             app: {
+                id: 'panorama',
                 title: 'Panorama 360',
                 description: 'Panorama 360 Kibana plugin',
-                main: 'plugins/panorama/panorama',
-                icon: 'plugins/panorama/icon.png'
+                order: -100,
+                icon: 'plugins/panorama/img/icon.png',
+                main: 'plugins/panorama/panorama_app',
+
+                injectVars: (server) => {
+                    return server.plugins.kibana.injectVars(server);
+                }
             }
         },
 
-        // The init method will be executed when the Kibana server starts and loads
-        // this plugin. It is used to set up everything that you need.
-        init(server, options) {
-            // Just call the api module that we imported above (the server/routes.js file)
-            // and pass the server to it, so it can register several API interfaces at the server.
-            api(server);
-        }
-
+        init: require('./init.js')
     });
 };
