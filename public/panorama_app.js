@@ -1,16 +1,35 @@
 // CSS
 require('./panorama_app.less');
 
-// Setup Panorama app
-const app = require('ui/modules').get('apps/panorama', []);
+// Title
+document.title = 'Panorama 360 - Kibana';
 
 // Require Kibana integrations
 require('ui/autoload/all');
 require('ui/chrome');
 
+// Controllers
+require('./controllers/workflow_controller');
 
+// Routes
+let routes = require('ui/routes');
+routes.enable();
+routes
+    .when('/', {
+        template: require('./templates/index.html'),
+        controller: 'panorama',
+        controllerAs: 'ctrl',
+        reloadOnSearch: true,
+    })
+    .when('/workflow/:id?', {
+        template: require('./templates/workflow.html'),
+        controller: 'workflow',
+        controllerAs: 'ctrl',
+        reloadOnSearch: true,
+    });
 
-
+// Setup Panorama app
+const app = require('ui/modules').get('apps/panorama', []);
 
 
 import {PanoramaConstants} from './panorama_constants';
@@ -20,18 +39,12 @@ import {notify, fatalError, toastNotifications} from 'ui/notify';
 import {timezoneProvider} from 'ui/vis/lib/timezone';
 import {recentlyAccessed} from 'ui/persisted_log';
 
-document.title = 'Panorama 360 - Kibana';
 
+app.controller('panorama', function ($scope, $http, kbnUrl, Private, timefilter) {
 
-require('ui/routes').enable();
-require('ui/routes').when('/', {
-    template: require('./templates/index.html'),
-    reloadOnSearch: false,
-});
-
-
-
-app.controller('panorama', function ($scope, kbnUrl, Private, timefilter) {
+    $http.get('../api/panorama/get/wf_ids').then((response) => {
+        $scope.wf_ids = response.data.wf_ids;
+    });
 
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
@@ -45,7 +58,7 @@ app.controller('panorama', function ($scope, kbnUrl, Private, timefilter) {
         testId: 'panoramaNewButton',
     }];
 
-    $scope.getDashTitle = () => "Workflow";
+    $scope.getWorkflowTitle = () => "Workflow";
 
     const init = function () {
         $scope.landingPageUrl = () => `#${PanoramaConstants.LANDING_PAGE_PATH}`;

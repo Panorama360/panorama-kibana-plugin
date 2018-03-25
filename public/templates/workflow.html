@@ -1,4 +1,4 @@
-<div class="panorama app-container" ng-controller="panorama">
+<div class="panorama app-container" ng-controller="workflow">
     <!-- Local nav. -->
     <kbn-top-nav name="panorama" config="topNavMenu">
         <!-- Transcluded elements. -->
@@ -12,24 +12,18 @@
                 <div class="kuiLocalBreadcrumb">
                     <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Panorama 360</a>
                 </div>
+                <div class="kuiLocalBreadcrumb">
+                    Workflow
+                </div>
             </div>
         </div>
     </kbn-top-nav>
 
     <main class="container-fluid">
         <div class="panel panel-default">
-            <div class="panel-heading"><strong>Workflows</strong></div>
+            <div class="panel-heading"><strong>Workflow</strong></div>
             <div class="panel-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        ng-repeat="wf_id in wf_ids">
-                        <div class="pull-left action-buttons">
-                            <a href="panorama#/workflow?id={{wf_id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
-                        </div>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        {{wf_id}}
-                    </li>
-                </ul>
+                {{ id }}
             </div>
         </div>
     </main>
