@@ -1,5 +1,11 @@
 {
   "author": "Rafael Ferreira da Silva <rafsilva@isi.edu>",
   "name": "panorama",
-  "version": "kibana"
+  "version": "kibana",
+  "dependencies": {
+    "cytoscape": "^3.2.11",
+    "qTip2": "^2.1.1",
+    "jquery": "^3.3.1",
+    "cytoscape-qtip": "^2.7.1"
+  }
 }
