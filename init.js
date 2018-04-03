@@ -11,17 +11,29 @@ export default function (server) {
                         bool: {
                             must: {
                                 term: {
-                                    'event': 'stampede.job.info'
+                                    'event': 'stampede.wf.plan'
                                 }
                             }
                         }
-                    }
+                    },
+                    sort: {"@timestamp": "desc"}
                 }
             }).then(response => {
-                let data = {'wf_ids': []};
+                let data = {'workflows': []};
                 for (let i = 0, len = response.hits.hits.length; i < len; i++) {
-                    if (data.wf_ids.indexOf(response.hits.hits[i]._source['xwf.id']) < 0) {
-                        data.wf_ids.push(response.hits.hits[i]._source['xwf.id']);
+                    let wf_id = response.hits.hits[i]._source['root__xwf__id'];
+                    let has_wf = false;
+                    for (let j = 0, len = data.workflows.length; j < len; j++) {
+                        if (data.workflows[j].id === wf_id) {
+                            has_wf = true;
+                            break;
+                        }
+                    }
+                    if (!has_wf) {
+                        data.workflows.push({
+                            id: wf_id,
+                            label: response.hits.hits[i]._source['dax__label']
+                        });
                     }
                 }
                 reply(data);
@@ -36,18 +48,20 @@ export default function (server) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
                 index: 'panorama',
-                size: 50,
+                size: 1000,
                 body: {
                     query: {
                         bool: {
-                            must: {
-                                match: {'xwf.id': request.params.wf_id}
-                            },
                             should: [
-                                {term: {'event': 'stampede.job.edge'}},
-                                {term: {'event': 'stampede.job.info'}}
+                                {match: {'xwf.id': request.params.wf_id}},
+                                {match: {'event': 'stampede.job.edge'}},
+                                {match: {'event': 'stampede.job.info'}},
+                                {match: {'xwf__id': request.params.wf_id}},
+                                {match: {'event': 'stampede.inv.start'}},
+                                {match: {'event': 'stampede.inv.end'}},
+                                {match: {'event': 'stampede.job_inst.submit.end'}}
                             ],
-                            minimum_should_match: 1,
+                            minimum_should_match: 2,
                             boost: 1.0
                         }
                     }
@@ -68,7 +82,7 @@ export default function (server) {
                             }
                         }
                         if (!job) {
-                            job = {'job_id': job_id, parents: [], children: []};
+                            job = {'job_id': job_id, status: 0, parents: [], children: []};
                             data.jobs.push(job);
                         }
                         job.type = res[i]._source['type_desc'];
@@ -91,6 +105,7 @@ export default function (server) {
                         if (parentNotSet) {
                             data.jobs.push({
                                 'job_id': parent,
+                                status: 0,
                                 parents: [],
                                 children: [child]
                             });
@@ -98,13 +113,61 @@ export default function (server) {
                         if (childNotSet) {
                             data.jobs.push({
                                 'job_id': child,
+                                status: 0,
                                 parents: [parent],
                                 children: []
                             });
                         }
+
+                    } else if (res[i]._source['event'] === 'stampede.inv.start') {
+                        let job_id = res[i]._source['job__id'];
+                        let job = null;
+                        for (let j = 0, len = data.jobs.length; j < len; j++) {
+                            if (data.jobs[j].job_id === job_id) {
+                                job = data.jobs[j];
+                                break;
+                            }
+                        }
+                        if (!job) {
+                            job = {'job_id': job_id, status: 2, parents: [], children: []};
+                            data.jobs.push(job);
+                        } else if (job.status < 2) {
+                            job.status = 2;
+                        }
+
+                    } else if (res[i]._source['event'] === 'stampede.inv.end') {
+                        let job_id = res[i]._source['job__id'];
+                        let job = null;
+                        for (let j = 0, len = data.jobs.length; j < len; j++) {
+                            if (data.jobs[j].job_id === job_id) {
+                                job = data.jobs[j];
+                                break;
+                            }
+                        }
+                        if (!job) {
+                            job = {'job_id': job_id, parents: [], children: []};
+                            data.jobs.push(job);
+                        }
+                        job.status = 3;
+
+                    } else if (res[i]._source['event'] === 'stampede.job_inst.submit.end') {
+                        let job_id = res[i]._source['job__id'];
+                        let job = null;
+                        for (let j = 0, len = data.jobs.length; j < len; j++) {
+                            if (data.jobs[j].job_id === job_id) {
+                                job = data.jobs[j];
+                                break;
+                            }
+                        }
+                        if (!job) {
+                            job = {'job_id': job_id, status: 1, parents: [], children: []};
+                            data.jobs.push(job);
+                        } else if (job.status < 1) {
+                            job.status = 1;
+                        }
                     }
                 }
-                console.log(data);
+                // console.log(data);
                 reply(data);
             })
         }

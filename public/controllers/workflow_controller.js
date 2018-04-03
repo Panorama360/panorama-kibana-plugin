@@ -2,14 +2,14 @@ import cytoscape from 'cytoscape';
 
 const app = require('ui/modules').get('apps/panorama', []);
 
-const node_colors = {
-    'compute': '#668d3c',
-    'cleanup': '#007996',
-    'create-dir': '#c3b7ac',
-    'stage-out-tx': '#0097ac',
-    'stage-in-tx': '#0097ac',
-    'registration': '#816c5b'
-};
+const node_colors = [
+    '#c3b7ac', // created
+    '#aca96e', // scheduled
+    '#668d3c', // running
+    '#007996', // completed
+    '#ac7970', // failed
+    '#816c5b' // unknown
+];
 
 app.factory('workflowGraph', ['$q', function ($q) {
 
@@ -28,7 +28,7 @@ app.factory('workflowGraph', ['$q', function ($q) {
                     id: job.job_id,
                     name: job.job_id,
                     type: job.type,
-                    faveBgColor: node_colors[job.type]
+                    faveBgColor: node_colors[job.status]
                 }
             });
             for (let j = 0; j < job.parents.length; j++) {
@@ -71,8 +71,8 @@ app.factory('workflowGraph', ['$q', function ($q) {
                 layout: {
                     name: 'breadthfirst',
                     directed: true,
-                    padding: 2,
-                    spacingFactor: 0.75
+                    padding: 0,
+                    spacingFactor: 1.05
                 },
 
                 elements: elements,
@@ -104,4 +104,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
             $scope.cyLoaded = true;
         });
     });
+
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
 });

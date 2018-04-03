@@ -43,7 +43,7 @@ import {recentlyAccessed} from 'ui/persisted_log';
 app.controller('panorama', function ($scope, $http, kbnUrl, Private, timefilter) {
 
     $http.get('../api/panorama/get/wf_ids').then((response) => {
-        $scope.wf_ids = response.data.wf_ids;
+        $scope.workflows = response.data.workflows;
     });
 
     timefilter.enableAutoRefreshSelector();

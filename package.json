@@ -2,6 +2,7 @@
   "author": "Rafael Ferreira da Silva <rafsilva@isi.edu>",
   "name": "panorama",
   "version": "kibana",
+  "license": "Apache-2.0",
   "dependencies": {
     "cytoscape": "^3.2.11",
     "qTip2": "^2.1.1",

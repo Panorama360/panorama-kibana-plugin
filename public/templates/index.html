@@ -22,12 +22,14 @@
             <div class="panel-body">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center"
-                        ng-repeat="wf_id in wf_ids">
+                        ng-repeat="wf in workflows">
                         <div class="pull-left action-buttons">
-                            <a href="panorama#/workflow?id={{wf_id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
+                            <a href="panorama#/workflow?id={{wf.id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
                         </div>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        {{wf_id}}
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="panorama#/workflow?id={{wf.id}}">{{wf.label}}</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <span style="color: #999; font-style: italic">({{wf.id}})</span>
                     </li>
                 </ul>
             </div>
