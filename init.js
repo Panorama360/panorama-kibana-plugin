@@ -172,4 +172,48 @@ export default function (server) {
             })
         }
     });
+
+    server.route({
+        path: '/api/panorama/get/job/{wf_id}/{job_id}',
+        method: 'GET',
+        handler(request, reply) {
+            const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
+            callWithRequest(request, 'search', {
+                index: 'panorama',
+                size: 1000,
+                body: {
+                    query: {
+                        bool: {
+                            should: [
+                                {match: {'xwf__id': request.params.wf_id}},
+                                {match: {'job__id': request.params.job_id}},
+                                {match: {'event': 'stampede.inv.end'}}
+                            ],
+                            minimum_should_match: 3,
+                            boost: 1.0
+                        }
+                    },
+                    sort: {"@timestamp": "asc"}
+                }
+            }).then(response => {
+                let res = response.hits.hits;
+                let data = {
+                    'job_id': request.params.job_id,
+                    'wf_id': request.params.wf_id,
+                    invocations: []
+                };
+
+                for (let i = 0, len = res.length; i < len; i++) {
+
+                    data.invocations.push({
+                        'executable': res[i]._source['executable'],
+                        'duration': parseFloat(res[i]._source['dur']),
+                        'remote_cpu_time': parseFloat(res[i]._source['remote_cpu_time']),
+                        'exit_code': res[i]._source['exitcode']
+                    });
+                }
+                reply(data);
+            });
+        }
+    });
 }

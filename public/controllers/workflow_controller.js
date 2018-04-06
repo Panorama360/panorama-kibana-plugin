@@ -26,6 +26,7 @@ app.factory('workflowGraph', ['$q', function ($q) {
                 group: 'nodes',
                 data: {
                     id: job.job_id,
+                    wf_id: workflow.wf_id,
                     name: job.job_id,
                     type: job.type,
                     faveBgColor: node_colors[job.status]
@@ -83,6 +84,11 @@ app.factory('workflowGraph', ['$q', function ($q) {
                 }
             });
 
+            cy.on('tap', 'node', function (event) {
+                let node = event.target;
+                angular.element(document.getElementById('wf-panel')).scope().GetMonitorDJobInfo(node.data());
+            });
+
         }); // on dom ready
 
         return deferred.promise;
@@ -107,4 +113,10 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
 
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
+
+    $scope.GetMonitorDJobInfo = function ($job) {
+        $http.get('../api/panorama/get/job/' + $job['wf_id'] + '/' + $job['id']).then((response) => {
+            $scope.job = response.data;
+        });
+    }
 });
