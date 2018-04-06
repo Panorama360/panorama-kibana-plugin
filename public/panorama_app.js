@@ -1,5 +1,7 @@
 // CSS
 require('./panorama_app.less');
+require('./semantic/dist/semantic.min.css');
+require('./semantic/dist/semantic.js');
 
 // Title
 document.title = 'Panorama 360 - Kibana';
@@ -30,7 +32,6 @@ routes
 
 // Setup Panorama app
 const app = require('ui/modules').get('apps/panorama', []);
-
 
 import {PanoramaConstants} from './panorama_constants';
 import {DocTitleProvider} from 'ui/doc_title';

@@ -15,6 +15,8 @@ app.factory('workflowGraph', ['$q', function ($q) {
 
     let cy;
 
+    $('.itt').popup();
+
     let workflowGraph = function (workflow) {
         let deferred = $q.defer();
 
@@ -101,8 +103,12 @@ app.factory('workflowGraph', ['$q', function ($q) {
 
 app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workflowGraph, Private, timefilter) {
 
-    $http.get('../api/panorama/get/wf/' + $routeParams.id).then((response) => {
+    $scope.showWfCharacteristics = true;
+    $scope.showJobCharacteristics = false;
+
+    $http.get('../api/panorama/get/wf/' + $routeParams.wf_label + '/' + $routeParams.wf_id).then((response) => {
         $scope.workflow = response.data;
+        $scope.showWfCharacteristics = true;
 
         let cy;
         workflowGraph($scope.workflow).then(function (workflowCy) {
@@ -112,11 +118,11 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
     });
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.enableTimeRangeSelector();
 
     $scope.GetMonitorDJobInfo = function ($job) {
         $http.get('../api/panorama/get/job/' + $job['wf_id'] + '/' + $job['id']).then((response) => {
             $scope.job = response.data;
+            $scope.showJobCharacteristics = true;
         });
     }
 });

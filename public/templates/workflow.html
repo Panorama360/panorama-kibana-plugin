@@ -19,19 +19,114 @@
         </div>
     </kbn-top-nav>
 
-    <main class="container-fluid">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Workflow</strong></div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
+    <main class="container-fluid" style="margin: 1em">
+        <div class="ui grid" id="wf-panel">
+            <div class="row">
+                <h3 class="ui header" style="margin-left: 1em; margin-right: 1em">
+                    <i class="settings icon"></i>
+                    <div class="content">
+                        Workflow Dashboard
+                        <div class="sub header">Panorama 360 Workflow Performance Explorer</div>
+                    </div>
+                </h3>
+            </div>
+
+            <div class="row">
+                <div class="eight wide column">
+                    <div class="ui black segment" id="wf-graph">
+                        <h4 class="ui small header">
+                            Workflow Graph
+                        </h4>
                         <div id="cy"></div>
                     </div>
-                    <div class="col-md-6">
-                        <div id="wf-panel"></div>
-                        {{job}}
-                        <!--{{ workflow }}-->
+                </div>
+                <div class="eight wide column">
+                    <div class="ui blue segment" id="wf-characteristics" ng-show="showWfCharacteristics">
+                        <h4 class="ui small header">
+                            Workflow Characteristics
+                        </h4>
+                        <!--<a class="ui top right attached mini label"-->
+                           <!--ng-click="showWfCharacteristics = !showWfCharacteristics">-->
+                            <!--<i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>-->
+                        <!--</a>-->
+
+
+                        <div class="ui divided mini list">
+                            <div class="item">
+                                <i class="sitemap icon itt" data-content="Workflow Label"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{workflow.wf_label}}
+                            </div>
+                            <div class="item">
+                                <i class="id card icon itt" data-content="Workflow ID" data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{workflow.wf_id}}
+                            </div>
+                            <div class="item">
+                                <i class="play icon itt" data-content="Workflow Start Time"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{workflow.start}}
+                            </div>
+                            <div class="item">
+                                <i class="flag checkered icon itt" data-content="Workflow End Time"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{workflow.end}}
+                            </div>
+                            <div class="item">
+                                <i class="clock icon itt" data-content="Workflow Makespan"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{workflow.makespan}}s
+                            </div>
+                        </div>
                     </div>
+                    <!-- -->
+                    <div class="ui grey segment" id="wf-job-characteristics" ng-show="showJobCharacteristics">
+                        <h4 class="ui small header">
+                            Job Characteristics
+                        </h4>
+                        <a class="ui top right attached mini label"
+                           ng-click="showJobCharacteristics = !showJobCharacteristics">
+                            <i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>
+                        </a>
+
+                        <div class="ui divided mini list">
+                            <div class="item">
+                                <i class="id card icon itt" data-content="Job ID" data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.job_id}}
+                            </div>
+                            <div class="item">
+                                <i class="th icon itt" data-content="Executable" data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.executable}}
+                            </div>
+                            <div class="item">
+                                <i class="clock icon itt" data-content="Duration" data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.duration}}s
+                            </div>
+                            <div class="item">
+                                <i class="clock outline icon itt" data-content="Remote CPU Time"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.remote_cpu_time}}s
+                            </div>
+                            <div class="item">
+                                <i class="check circle outline icon itt" data-content="Exit Code"
+                                   data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.exit_code}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--{{ workflow }}-->
+                    <br/><br/>
+                    <!--{{job}}-->
                 </div>
             </div>
         </div>

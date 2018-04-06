@@ -42,7 +42,7 @@ export default function (server) {
     });
 
     server.route({
-        path: '/api/panorama/get/wf/{wf_id}',
+        path: '/api/panorama/get/wf/{wf_label}/{wf_id}',
         method: 'GET',
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
@@ -59,7 +59,9 @@ export default function (server) {
                                 {match: {'xwf__id': request.params.wf_id}},
                                 {match: {'event': 'stampede.inv.start'}},
                                 {match: {'event': 'stampede.inv.end'}},
-                                {match: {'event': 'stampede.job_inst.submit.end'}}
+                                {match: {'event': 'stampede.job_inst.submit.end'}},
+                                {match: {'event': 'stampede.xwf.start'}},
+                                {match: {'event': 'stampede.xwf.end'}}
                             ],
                             minimum_should_match: 2,
                             boost: 1.0
@@ -67,12 +69,30 @@ export default function (server) {
                     }
                 }
             }).then(response => {
-                let data = {'wf_id': request.params.wf_id, 'jobs': []};
+                let data = {
+                    'wf_id': request.params.wf_id,
+                    'wf_label': request.params.wf_label,
+                    'start': 0,
+                    'end': 0,
+                    'makespan': 0,
+                    'jobs': []
+                };
                 let res = response.hits.hits;
+                let start = 0;
+                let end = 0;
 
                 for (let i = 0, len = res.length; i < len; i++) {
 
-                    if (res[i]._source['event'] === 'stampede.job.info') {
+                    if (res[i]._source['event'] === 'stampede.xwf.start') {
+                        start = res[i]._source['ts'];
+                        data['start'] = new Date(start * 1000).toUTCString();
+
+                    } else if (res[i]._source['event'] === 'stampede.xwf.end') {
+                        end = res[i]._source['ts'];
+                        data['makespan'] = end - start;
+                        data['end'] = new Date(end * 1000).toUTCString();
+
+                    } else if (res[i]._source['event'] === 'stampede.job.info') {
                         let job_id = res[i]._source['job.id'];
                         let job = null;
                         for (let j = 0, len = data.jobs.length; j < len; j++) {
@@ -200,17 +220,16 @@ export default function (server) {
                 let data = {
                     'job_id': request.params.job_id,
                     'wf_id': request.params.wf_id,
-                    invocations: []
+                    'remote_cpu_time': 0
                 };
 
                 for (let i = 0, len = res.length; i < len; i++) {
-
-                    data.invocations.push({
-                        'executable': res[i]._source['executable'],
-                        'duration': parseFloat(res[i]._source['dur']),
-                        'remote_cpu_time': parseFloat(res[i]._source['remote_cpu_time']),
-                        'exit_code': res[i]._source['exitcode']
-                    });
+                    if (res[i]._source['inv__id'] >= 0) {
+                        data['executable'] = res[i]._source['executable'];
+                        data['duration'] = parseFloat(res[i]._source['dur']);
+                        data['remote_cpu_time'] = parseFloat(res[i]._source['remote_cpu_time']);
+                        data['exit_code'] = res[i]._source['exitcode'];
+                    }
                 }
                 reply(data);
             });
