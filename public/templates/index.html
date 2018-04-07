@@ -1,4 +1,5 @@
 <div class="panorama app-container" ng-controller="panorama">
+
     <!-- Local nav. -->
     <kbn-top-nav name="panorama" config="topNavMenu">
         <!-- Transcluded elements. -->
@@ -16,25 +17,42 @@
         </div>
     </kbn-top-nav>
 
-    <main class="container-fluid">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Workflows</strong></div>
-            <div class="panel-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        ng-repeat="wf in workflows">
-                        <div class="pull-left action-buttons">
-                            <a href="panorama#/workflow?wf_label={{wf.label}}&wf_id={{wf.id}}">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                            </a>
-                        </div>
-                        &nbsp;&nbsp;
-                        <a href="panorama#/workflow?wf_label={{wf.label}}&wf_id={{wf.id}}">{{wf.label}}</a>
-                        &nbsp;&nbsp;
-                        <span style="color: #999; font-style: italic">({{wf.id}})</span>
-                    </li>
-                </ul>
+    <main class="container-fluid" style="margin: 1em">
+        <div class="ui grid">
+            <div class="row">
+                <h3 class="ui header" style="margin-left: 1em; margin-right: 1em">
+                    <div class="content">
+                        <img class="ui small image"
+                             src="https://panorama360.github.io/assets/images/logos/horizontal.png"/>
+                        <div class="sub header" style="margin-left: 2em"><i>Workflow Performance Explorer</i></div>
+                    </div>
+                </h3>
             </div>
+
+            <div class="row">
+                <div class="sixteen wide column">
+                    <div class="ui green segment" id="wf-graph">
+                        <h4 class="ui small header">
+                            List of Workflows
+                        </h4>
+                        <div class="ui middle aligned divided small list">
+                            <div class="item" ng-repeat="wf in workflows">
+                                <i class="normal sitemap middle aligned icon"></i>
+                                <div class="small content">
+                                    <a href="panorama#/workflow?wf_label={{wf.label}}&wf_id={{wf.id}}" class="header">
+                                        {{wf.label}}
+                                    </a>
+                                    <div class="description">
+                                        {{wf.start}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
+
 </div>

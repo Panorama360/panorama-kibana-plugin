@@ -21,8 +21,10 @@ export default function (server) {
             }).then(response => {
                 let data = {'workflows': []};
                 for (let i = 0, len = response.hits.hits.length; i < len; i++) {
-                    let wf_id = response.hits.hits[i]._source['root__xwf__id'];
+                    let res = response.hits.hits[i];
                     let has_wf = false;
+                    let wf_id = res._source['root__xwf__id'];
+
                     for (let j = 0, len = data.workflows.length; j < len; j++) {
                         if (data.workflows[j].id === wf_id) {
                             has_wf = true;
@@ -32,7 +34,8 @@ export default function (server) {
                     if (!has_wf) {
                         data.workflows.push({
                             id: wf_id,
-                            label: response.hits.hits[i]._source['dax__label']
+                            label: res._source['dax__label'],
+                            start: new Date(res._source['ts'] * 1000).toUTCString()
                         });
                     }
                 }
@@ -75,6 +78,8 @@ export default function (server) {
                     'start': 0,
                     'end': 0,
                     'makespan': 0,
+                    'status': 'Running',
+                    'status_color': 'green',
                     'jobs': []
                 };
                 let res = response.hits.hits;
@@ -91,6 +96,14 @@ export default function (server) {
                         end = res[i]._source['ts'];
                         data['makespan'] = end - start;
                         data['end'] = new Date(end * 1000).toUTCString();
+
+                        if (res[i]._source['status'] === 0) {
+                            data['status'] = 'Completed';
+                            data['status_color'] = 'blue';
+                        } else if (res[i]._source['status'] === -1) {
+                            data['status'] = 'Failed';
+                            data['status_color'] = 'red';
+                        }
 
                     } else if (res[i]._source['event'] === 'stampede.job.info') {
                         let job_id = res[i]._source['job.id'];

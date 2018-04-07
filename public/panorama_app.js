@@ -48,16 +48,6 @@ app.controller('panorama', function ($scope, $http, kbnUrl, Private, timefilter)
     });
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.enableTimeRangeSelector();
-
-    $scope.topNavMenu = [{
-        key: 'new',
-        description: 'New Sheet',
-        run: function () {
-            kbnUrl.change('/');
-        },
-        testId: 'panoramaNewButton',
-    }];
 
     $scope.getWorkflowTitle = () => "Workflow";
 
