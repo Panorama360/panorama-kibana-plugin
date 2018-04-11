@@ -1,4 +1,7 @@
 import cytoscape from 'cytoscape';
+import 'ui/visualize';
+import {VisProvider} from 'ui/vis';
+import {getVisualizeLoader} from 'ui/visualize/loader';
 
 const app = require('ui/modules').get('apps/panorama', []);
 
@@ -101,10 +104,12 @@ app.factory('workflowGraph', ['$q', function ($q) {
     return workflowGraph;
 }]);
 
-app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workflowGraph, Private, timefilter) {
+app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workflowGraph, Private,
+                                     savedVisualizations, serviceSettings, timefilter) {
 
     $scope.showWfCharacteristics = true;
     $scope.showJobCharacteristics = false;
+    $scope.showJobTimeSeries = false;
 
     $http.get('../api/panorama/get/wf/' + $routeParams.wf_label + '/' + $routeParams.wf_id).then((response) => {
         $scope.workflow = response.data;
@@ -124,5 +129,49 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
             $scope.job = response.data;
             $scope.showJobCharacteristics = true;
         });
-    }
+    };
+
+    $scope.GetJobTimeSeries = function ($job_id, $wf_id) {
+        $http.get('../api/panorama/get/job/series/' + $wf_id + '/' + $job_id).then((response) => {
+            $scope.job_series = response.data;
+
+            let stime_series = [{x: 0, y: 0}];
+            let utime_series = [{x: 0, y: 0}];
+
+            for (let i = 0, len = $scope.job_series.records.length; i < len; i++) {
+                stime_series.push({
+                    x: $scope.job_series.records[i].step,
+                    y: $scope.job_series.records[i].stime,
+                });
+                utime_series.push({
+                    x: $scope.job_series.records[i].step,
+                    y: $scope.job_series.records[i].utime,
+                });
+            }
+
+            $scope.myVisData = {
+                'label': 'My Label',
+                'xAxisLabel': 'Job Makespan (s)',
+                'yAxisLabel': 'Time (s)',
+                'series': [
+                    {
+                        'label': 'stime',
+                        'values': stime_series
+                    },
+                    {
+                        'label': 'utime',
+                        'values': utime_series
+                    }
+                ]
+            };
+
+            let Vis = Private(VisProvider);
+            $scope.myVis = new Vis('.panorama*', {
+                type: 'area',
+                mode: 'stacked',
+            });
+
+            $scope.showJobTimeSeries = true;
+        });
+    };
 });

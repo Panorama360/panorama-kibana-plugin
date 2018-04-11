@@ -248,4 +248,52 @@ export default function (server) {
             });
         }
     });
+
+    server.route({
+        path: '/api/panorama/get/job/series/{wf_id}/{job_id}',
+        method: 'GET',
+        handler(request, reply) {
+            const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
+            callWithRequest(request, 'search', {
+                index: 'panorama',
+                size: 1000,
+                body: {
+                    query: {
+                        bool: {
+                            should: [
+                                {match: {'wf_uuid': request.params.wf_id}},
+                                {match: {'dag_job_id': request.params.job_id}},
+                                {match: {'event': 'kickstart.inv.online'}}
+                            ],
+                            minimum_should_match: 3,
+                            boost: 1.0
+                        }
+                    },
+                    sort: {"@timestamp": "asc"}
+                }
+            }).then(response => {
+                let res = response.hits.hits;
+                let data = {
+                    'job_id': request.params.job_id,
+                    'wf_id': request.params.wf_id,
+                    'records': []
+                };
+
+                let start_time = 0;
+
+                for (let i = 0, len = res.length; i < len; i++) {
+                    if (start_time === 0) {
+                        start_time = res[i]._source['ts'] - (res[i]._source['utime'] + res[i]._source['stime']);
+                    }
+                    data.records.push({
+                        'step': res[i]._source['ts'] - start_time,
+                        'utime': res[i]._source['utime'],
+                        'stime': res[i]._source['stime']
+                    });
+                }
+
+                reply(data);
+            });
+        }
+    });
 }

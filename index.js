@@ -10,9 +10,18 @@ export default function (kibana) {
                 id: 'panorama',
                 title: 'Panorama 360',
                 description: 'Panorama 360 Kibana plugin',
-                order: -100,
+                order: -999,
                 icon: 'plugins/panorama/img/icon.png',
                 main: 'plugins/panorama/panorama_app',
+                uses: [
+                    'visTypes',
+                    'visResponseHandlers',
+                    'visRequestHandlers',
+                    'visEditorTypes',
+                    'savedObjectTypes',
+                    'spyModes',
+                    'fieldFormats',
+                ],
 
                 injectVars: (server) => {
                     return server.plugins.kibana.injectVars(server);

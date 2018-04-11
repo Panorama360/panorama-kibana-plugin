@@ -46,12 +46,11 @@
                             Workflow Characteristics
                         </h4>
                         <!--<a class="ui top right attached mini label"-->
-                           <!--ng-click="showWfCharacteristics = !showWfCharacteristics">-->
-                            <!--<i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>-->
+                        <!--ng-click="showWfCharacteristics = !showWfCharacteristics">-->
+                        <!--<i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>-->
                         <!--</a>-->
 
-
-                        <div class="ui divided mini list">
+                        <div class="ui divided small list">
                             <div class="item">
                                 <i class="sitemap icon itt" data-content="Workflow Label"
                                    data-variation="small"></i>
@@ -82,21 +81,21 @@
                                 {{workflow.makespan}}s
                             </div>
                             <div class="item">
-                                <div class="ui {{workflow.status_color}} mini label">{{workflow.status}}</div>
+                                <div class="ui {{workflow.status_color}} small label">{{workflow.status}}</div>
                             </div>
                         </div>
                     </div>
-                    <!-- -->
+
                     <div class="ui grey segment" id="wf-job-characteristics" ng-show="showJobCharacteristics">
                         <h4 class="ui small header">
                             Job Characteristics
                         </h4>
-                        <a class="ui top right attached mini label"
+                        <a class="ui top right attached small label"
                            ng-click="showJobCharacteristics = !showJobCharacteristics">
-                            <i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>
+                            <i class="white close icon small itt" data-content="Hide panel" data-variation="mini"></i>
                         </a>
 
-                        <div class="ui divided mini list">
+                        <div class="ui divided small list">
                             <div class="item">
                                 <i class="id card icon itt" data-content="Job ID" data-variation="small"></i>
                                 &nbsp;&nbsp;
@@ -125,11 +124,53 @@
                                 {{job.exit_code}}
                             </div>
                         </div>
+
+                        <button class="ui teal small button"
+                                ng-click="GetJobTimeSeries(job.job_id, job.wf_id)">
+                            <i class="chart area icon"></i> Time series
+                        </button>
                     </div>
 
                     <!--{{ workflow }}-->
                     <br/><br/>
                     <!--{{job}}-->
+                </div>
+            </div>
+        </div>
+
+        <div class="ui grid" id="vis-panel">
+            <div class="row">
+                <div class="sixteen wide column">
+                    <div class="ui teal segment" id="wf-job-time-series" ng-show="showJobTimeSeries">
+                        <h4 class="ui small header" style="margin-top: 1em">
+                            Job Characteristics: Time Series
+                        </h4>
+                        <a class="ui top right attached small label"
+                           ng-click="showJobTimeSeries = !showJobTimeSeries">
+                            <i class="white close icon small itt" data-content="Hide panel"
+                               data-variation="mini"></i>
+                        </a>
+
+                        <div class="ui grid">
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <div class="test-vis-app-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="myVis"
+                                                           vis-data="myVisData"
+                                                           style="height: 300px">YES
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        {{job_series}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
