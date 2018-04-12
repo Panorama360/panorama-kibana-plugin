@@ -274,22 +274,35 @@ export default function (server) {
             }).then(response => {
                 let res = response.hits.hits;
                 let data = {
-                    'job_id': request.params.job_id,
-                    'wf_id': request.params.wf_id,
-                    'records': []
+                    job_id: request.params.job_id,
+                    wf_id: request.params.wf_id,
+                    records: []
                 };
 
                 let start_time = 0;
+                let rchar = 0;
+                let wchar = 0;
+                let prev_iowait = 0;
 
                 for (let i = 0, len = res.length; i < len; i++) {
                     if (start_time === 0) {
                         start_time = res[i]._source['ts'] - (res[i]._source['utime'] + res[i]._source['stime']);
                     }
+                    rchar = rchar + res[i]._source['rchar'];
+                    wchar = wchar + res[i]._source['wchar'];
+
                     data.records.push({
-                        'step': res[i]._source['ts'] - start_time,
-                        'utime': res[i]._source['utime'],
-                        'stime': res[i]._source['stime']
+                        step: (res[i]._source['ts'] - start_time).toFixed(2),
+                        utime: res[i]._source['utime'],
+                        stime: res[i]._source['stime'],
+                        cpu: res[i]._source['utime'] / (res[i]._source['utime'] + res[i]._source['stime']),
+                        rchar: res[i]._source['rchar'],
+                        wchar: res[i]._source['wchar'],
+                        crchar: rchar,
+                        cwchar: wchar,
+                        iowait: res[i]._source['iowait'] - prev_iowait
                     });
+                    prev_iowait = res[i]._source['iowait'];
                 }
 
                 reply(data);

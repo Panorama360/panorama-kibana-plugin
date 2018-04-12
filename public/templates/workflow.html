@@ -154,18 +154,69 @@
                         <div class="ui grid">
                             <div class="row">
                                 <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Cumulative Time in User and System Codes
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="cumulTime"
+                                                           vis-data="cumulTimeData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="four wide column">
                                     <div class="ui segment">
-                                        <div class="test-vis-app-visualization">
-                                            <visualization ng-if="showJobTimeSeries" vis="myVis"
-                                                           vis-data="myVisData"
-                                                           style="height: 300px">YES
+                                        <h4 class="ui small center aligned grey header">
+                                            Average CPU Utilization
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="gauge"
+                                                           vis-data="gaugeData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Bytes Read/Written
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="bytes"
+                                                           vis-data="bytesData" style="height: 300px">
                                             </visualization>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="eight wide column">
                                     <div class="ui segment">
-                                        {{job_series}}
+                                        <h4 class="ui small center aligned grey header">
+                                            Cumulative Bytes Read/Written
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="cumulBytes"
+                                                           vis-data="cumulBytesData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            I/O Wait
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="iowait"
+                                                           vis-data="iowaitData" style="height: 300px">
+                                            </visualization>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
