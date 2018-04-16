@@ -35,7 +35,7 @@ export default function (server) {
                         data.workflows.push({
                             id: wf_id,
                             label: res._source['dax__label'],
-                            start: new Date(res._source['ts'] * 1000).toUTCString()
+                            start: new Date(res._source['ts'] * 1000).toLocaleString()
                         });
                     }
                 }
@@ -60,7 +60,7 @@ export default function (server) {
                                 {match: {'event': 'stampede.job.edge'}},
                                 {match: {'event': 'stampede.job.info'}},
                                 {match: {'xwf__id': request.params.wf_id}},
-                                {match: {'event': 'stampede.inv.start'}},
+                                {match: {'event': 'stampede.job_inst.main.start'}},
                                 {match: {'event': 'stampede.inv.end'}},
                                 {match: {'event': 'stampede.job_inst.submit.end'}},
                                 {match: {'event': 'stampede.xwf.start'}},
@@ -69,7 +69,8 @@ export default function (server) {
                             minimum_should_match: 2,
                             boost: 1.0
                         }
-                    }
+                    },
+                    sort: {"@timestamp": "asc"}
                 }
             }).then(response => {
                 let data = {
@@ -90,19 +91,19 @@ export default function (server) {
 
                     if (res[i]._source['event'] === 'stampede.xwf.start') {
                         start = res[i]._source['ts'];
-                        data['start'] = new Date(start * 1000).toUTCString();
+                        data.start = new Date(start * 1000).toLocaleString();
 
                     } else if (res[i]._source['event'] === 'stampede.xwf.end') {
                         end = res[i]._source['ts'];
-                        data['makespan'] = end - start;
-                        data['end'] = new Date(end * 1000).toUTCString();
+                        data.makespan = parseInt(end) - parseInt(start);
+                        data.end = new Date(end * 1000).toLocaleString();
 
                         if (res[i]._source['status'] === 0) {
-                            data['status'] = 'Completed';
-                            data['status_color'] = 'blue';
+                            data.status = 'Completed';
+                            data.status_color = 'blue';
                         } else if (res[i]._source['status'] === -1) {
-                            data['status'] = 'Failed';
-                            data['status_color'] = 'red';
+                            data.status = 'Failed';
+                            data.status_color = 'red';
                         }
 
                     } else if (res[i]._source['event'] === 'stampede.job.info') {
@@ -152,7 +153,7 @@ export default function (server) {
                             });
                         }
 
-                    } else if (res[i]._source['event'] === 'stampede.inv.start') {
+                    } else if (res[i]._source['event'] === 'stampede.job_inst.main.start') {
                         let job_id = res[i]._source['job__id'];
                         let job = null;
                         for (let j = 0, len = data.jobs.length; j < len; j++) {
@@ -200,14 +201,13 @@ export default function (server) {
                         }
                     }
                 }
-                // console.log(data);
                 reply(data);
             })
         }
     });
 
     server.route({
-        path: '/api/panorama/get/job/{wf_id}/{job_id}',
+        path: '/api/panorama/get/job/{wf_id}/{job_id}/{job_type}',
         method: 'GET',
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
@@ -231,17 +231,18 @@ export default function (server) {
             }).then(response => {
                 let res = response.hits.hits;
                 let data = {
-                    'job_id': request.params.job_id,
-                    'wf_id': request.params.wf_id,
-                    'remote_cpu_time': 0
+                    job_id: request.params.job_id,
+                    wf_id: request.params.wf_id,
+                    type: request.params.job_type,
+                    remote_cpu_time: 0
                 };
 
                 for (let i = 0, len = res.length; i < len; i++) {
                     if (res[i]._source['inv__id'] >= 0) {
-                        data['executable'] = res[i]._source['executable'];
-                        data['duration'] = parseFloat(res[i]._source['dur']);
-                        data['remote_cpu_time'] = parseFloat(res[i]._source['remote_cpu_time']);
-                        data['exit_code'] = res[i]._source['exitcode'];
+                        data.executable = res[i]._source['executable'];
+                        data.duration = parseFloat(res[i]._source['dur']);
+                        data.remote_cpu_time = parseFloat(res[i]._source['remote_cpu_time']);
+                        data.exit_code = res[i]._source['exitcode'];
                     }
                 }
                 reply(data);
@@ -250,7 +251,7 @@ export default function (server) {
     });
 
     server.route({
-        path: '/api/panorama/get/job/series/{wf_id}/{job_id}',
+        path: '/api/panorama/get/job/series/{wf_id}/{job_id}/{job_type}',
         method: 'GET',
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
@@ -276,9 +277,9 @@ export default function (server) {
                 let data = {
                     job_id: request.params.job_id,
                     wf_id: request.params.wf_id,
+                    type: request.params.job_type,
                     records: []
                 };
-
                 let start_time = 0;
                 let rchar = 0;
                 let wchar = 0;
@@ -300,12 +301,79 @@ export default function (server) {
                         wchar: res[i]._source['wchar'],
                         crchar: rchar,
                         cwchar: wchar,
-                        iowait: res[i]._source['iowait'] - prev_iowait
+                        iowait: res[i]._source['iowait'] - prev_iowait,
+                        threads: res[i]._source['threads']
                     });
                     prev_iowait = res[i]._source['iowait'];
                 }
-
                 reply(data);
+            });
+        }
+    });
+
+    server.route({
+        path: '/api/panorama/get/job/xfer/{wf_id}/{job_id}/{job_type}/{job_duration}',
+        method: 'GET',
+        handler(request, reply) {
+            const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
+            callWithRequest(request, 'search', {
+                index: 'panorama',
+                size: 1000,
+                body: {
+                    query: {
+                        bool: {
+                            should: [
+                                {match: {'wf_uuid': request.params.wf_id}},
+                                {match: {'dag_job_id': request.params.job_id}},
+                                {match: {'event': 'transfer.inv.go'}},
+                                {match: {'status': 'SUCCEEDED'}}
+                            ],
+                            minimum_should_match: 4,
+                            boost: 1.0
+                        }
+                    },
+                    sort: {"@timestamp": "asc"}
+                }
+            }).then(response => {
+                let res = response.hits.hits;
+                let data = {
+                    job_id: request.params.job_id,
+                    wf_id: request.params.wf_id,
+                    type: request.params.job_type,
+                    duration: request.params.job_duration,
+                    records: []
+                };
+                let start_time = 0;
+                let cum_bytes_transferred = 0;
+
+                for (let i = 0, len = res.length; i < len; i++) {
+                    data.files = res[i]._source['files'];
+                    data.source_endpoint = res[i]._source['source_endpoint_display_name'];
+                    data.dest_endpoint = res[i]._source['destination_endpoint_display_name'];
+
+                    let transfer_events = res[i]._source['transfer_events'];
+
+                    for (let j = 0; j < transfer_events.length; j++) {
+                        if (transfer_events[j].code === 'PROGRESS') {
+                            let details = JSON.parse(transfer_events[j].details);
+                            cum_bytes_transferred = cum_bytes_transferred + details.bytes_transferred;
+
+                            if (start_time === 0) {
+                                start_time = Date.parse(transfer_events[j].time) - (details.duration * 1000);
+                            }
+                            data.records.push({
+                                step: (Date.parse(transfer_events[j].time) - start_time) / 1000,
+                                duration: details.duration,
+                                bytes_transferred: details.bytes_transferred,
+                                cum_bytes_transferred: cum_bytes_transferred,
+                                mbps: details.mbps
+                            });
+                            break;
+                        }
+                    }
+                }
+                reply(data);
+                console.log(data);
             });
         }
     });

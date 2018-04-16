@@ -45,11 +45,6 @@
                         <h4 class="ui small header">
                             Workflow Characteristics
                         </h4>
-                        <!--<a class="ui top right attached mini label"-->
-                        <!--ng-click="showWfCharacteristics = !showWfCharacteristics">-->
-                        <!--<i class="white close icon mini itt" data-content="Hide panel" data-variation="mini"></i>-->
-                        <!--</a>-->
-
                         <div class="ui divided small list">
                             <div class="item">
                                 <i class="sitemap icon itt" data-content="Workflow Label"
@@ -68,13 +63,13 @@
                                 &nbsp;&nbsp;
                                 {{workflow.start}}
                             </div>
-                            <div class="item">
+                            <div class="item" ng-if="workflow.end">
                                 <i class="flag checkered icon itt" data-content="Workflow End Time"
                                    data-variation="small"></i>
                                 &nbsp;&nbsp;
                                 {{workflow.end}}
                             </div>
-                            <div class="item">
+                            <div class="item" ng-if="workflow.makespan">
                                 <i class="clock icon itt" data-content="Workflow Makespan"
                                    data-variation="small"></i>
                                 &nbsp;&nbsp;
@@ -107,17 +102,22 @@
                                 {{job.executable}}
                             </div>
                             <div class="item">
+                                <i class="tag icon itt" data-content="Type" data-variation="small"></i>
+                                &nbsp;&nbsp;
+                                {{job.type}}
+                            </div>
+                            <div class="item" ng-if="job.duration">
                                 <i class="clock icon itt" data-content="Duration" data-variation="small"></i>
                                 &nbsp;&nbsp;
                                 {{job.duration}}s
                             </div>
-                            <div class="item">
+                            <div class="item" ng-if="job.remote_cpu_time">
                                 <i class="clock outline icon itt" data-content="Remote CPU Time"
                                    data-variation="small"></i>
                                 &nbsp;&nbsp;
                                 {{job.remote_cpu_time}}s
                             </div>
-                            <div class="item">
+                            <div class="item" ng-if="job.exit_code">
                                 <i class="check circle outline icon itt" data-content="Exit Code"
                                    data-variation="small"></i>
                                 &nbsp;&nbsp;
@@ -126,14 +126,10 @@
                         </div>
 
                         <button class="ui teal small button"
-                                ng-click="GetJobTimeSeries(job.job_id, job.wf_id)">
+                                ng-click="GetJobTimeSeries(job.job_id, job.type, job.duration, job.wf_id)">
                             <i class="chart area icon"></i> Time series
                         </button>
                     </div>
-
-                    <!--{{ workflow }}-->
-                    <br/><br/>
-                    <!--{{job}}-->
                 </div>
             </div>
         </div>
@@ -141,7 +137,9 @@
         <div class="ui grid" id="vis-panel">
             <div class="row">
                 <div class="sixteen wide column">
-                    <div class="ui teal segment" id="wf-job-time-series" ng-show="showJobTimeSeries">
+
+                    <!-- Compute Job Time Series -->
+                    <div class="ui teal segment" ng-show="showJobTimeSeries">
                         <h4 class="ui small header" style="margin-top: 1em">
                             Job Characteristics: Time Series
                         </h4>
@@ -156,7 +154,7 @@
                                 <div class="eight wide column">
                                     <div class="ui segment" style="margin-left: 1em">
                                         <h4 class="ui small center aligned grey header">
-                                            Cumulative Time in User and System Codes
+                                            Cumulative Time Spent in User and System Codes
                                         </h4>
                                         <div class="panorama-visualization">
                                             <visualization ng-if="showJobTimeSeries" vis="cumulTime"
@@ -210,11 +208,134 @@
                                 <div class="eight wide column">
                                     <div class="ui segment" style="margin-left: 1em">
                                         <h4 class="ui small center aligned grey header">
-                                            I/O Wait
+                                            Avg. I/O Wait per Thread
                                         </h4>
                                         <div class="panorama-visualization">
                                             <visualization ng-if="showJobTimeSeries" vis="iowait"
                                                            vis-data="iowaitData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Number of Threads
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobTimeSeries" vis="thread"
+                                                           vis-data="threadData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transfer Job Time Series Data -->
+                    <div class="ui teal segment" ng-show="showJobXfer">
+                        <h4 class="ui small header" style="margin-top: 1em">
+                            Transfer Job Characteristics
+                        </h4>
+
+                        <div class="ui grid">
+                            <div class="row">
+                                <div class="four wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Transfer Characteristics
+                                        </h4>
+                                        <div class="ui divided small list">
+                                            <div class="item">
+                                                <i class="map marker alternate icon itt" data-content="Source Endpoint"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.source_endpoint}}
+                                            </div>
+                                            <div class="item">
+                                                <i class="thumbtack icon itt" data-content="Destination Endpoint"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.dest_endpoint}}
+                                            </div>
+                                            <div class="item">
+                                                <i class="download icon itt" data-content="Total MB Transferred"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.total_bytes}} MB
+                                            </div>
+                                            <div class="item">
+                                                <i class="clock icon itt" data-content="Total Transfer Time"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.duration}}s
+                                            </div>
+                                            <div class="item">
+                                                <i class="clock outline icon itt" data-content="Effective Transfer Time"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.effective_duration}}s
+                                            </div>
+                                            <div class="item">
+                                                <i class="copy icon itt" data-content="Files"
+                                                   data-variation="small"></i>
+                                                &nbsp;&nbsp;
+                                                {{job_xfer.files}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="four wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Average Transfer Speed
+                                        </h4>
+                                        <div class="center aligned">
+                                            <h2>{{job_xfer.avg_speed}} Mbps</h2>
+                                        </div>
+                                        <!--<div class="panorama-visualization">-->
+                                        <!--<visualization ng-if="showJobXfer" vis="metricXferSpeed"-->
+                                        <!--vis-data="metricXferSpeedData" style="height: 300px">-->
+                                        <!--</visualization>-->
+                                        <!--</div>-->
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Transfer Speed
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobXfer" vis="speedXfer"
+                                                           vis-data="speedXferData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Bytes Transferred
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobXfer" vis="bytesXfer"
+                                                           vis-data="bytesXferData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Cumulative Bytes Transferred
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showJobXfer" vis="cumulBytesXfer"
+                                                           vis-data="cumulBytesXferData" style="height: 300px">
                                             </visualization>
                                         </div>
                                     </div>
