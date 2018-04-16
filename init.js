@@ -373,7 +373,6 @@ export default function (server) {
                     }
                 }
                 reply(data);
-                console.log(data);
             });
         }
     });

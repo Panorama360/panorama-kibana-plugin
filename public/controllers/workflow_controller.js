@@ -363,7 +363,6 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
                 let sum_steps = 0;
                 for (let i = 0, len = $scope.job_xfer.records.length; i < len; i++) {
                     let rec = $scope.job_xfer.records[i];
-                    console.log(speed_series[i].x);
                     avg_speed = avg_speed + (rec.mbps * rec.duration);
                     sum_steps = sum_steps + rec.duration;
                 }
