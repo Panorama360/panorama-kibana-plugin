@@ -5,7 +5,7 @@ export default function (server) {
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
-                index: 'panorama',
+                index: 'panorama_stampede',
                 body: {
                     query: {
                         bool: {
@@ -50,7 +50,7 @@ export default function (server) {
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
-                index: 'panorama',
+                index: 'panorama_stampede',
                 size: 1000,
                 body: {
                     query: {
@@ -212,7 +212,7 @@ export default function (server) {
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
-                index: 'panorama',
+                index: 'panorama_stampede',
                 size: 1000,
                 body: {
                     query: {
@@ -256,7 +256,7 @@ export default function (server) {
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
-                index: 'panorama',
+                index: 'panorama_kickstart',
                 size: 1000,
                 body: {
                     query: {
@@ -317,7 +317,7 @@ export default function (server) {
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
-                index: 'panorama',
+                index: 'panorama_transfer',
                 size: 1000,
                 body: {
                     query: {
