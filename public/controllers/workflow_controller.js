@@ -14,7 +14,7 @@ const node_colors = [
     '#816c5b' // unknown
 ];
 
-app.factory('workflowGraph', ['$q', function ($q) {
+app.factory('workflowGraph', ['$q', '$rootScope', function ($q, $rootScope) {
 
     let cy;
 
@@ -89,9 +89,9 @@ app.factory('workflowGraph', ['$q', function ($q) {
                 }
             });
 
-            cy.on('tap', 'node', function (event) {
+            cy.on('tap', 'node', (event) => {
                 let node = event.target;
-                angular.element(document.getElementById('wf-panel')).scope().GetMonitorDJobInfo(node.data());
+                $rootScope.GetMonitorDJobInfo(node.data());
             });
 
         }); // on dom ready
@@ -104,7 +104,7 @@ app.factory('workflowGraph', ['$q', function ($q) {
     return workflowGraph;
 }]);
 
-app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workflowGraph, Private,
+app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootScope, workflowGraph, Private,
                                      savedVisualizations, serviceSettings, timefilter) {
 
     $scope.showWfCharacteristics = true;
@@ -126,7 +126,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, workfl
 
     timefilter.enableAutoRefreshSelector();
 
-    $scope.GetMonitorDJobInfo = function ($job) {
+    $rootScope.GetMonitorDJobInfo = function ($job) {
         $http.get('../api/panorama/get/job/' + $job.wf_id + '/' + $job.id + '/' + $job.type).then((response) => {
             $scope.job = response.data;
             $scope.showJobCharacteristics = true;
