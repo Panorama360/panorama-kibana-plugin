@@ -101,9 +101,12 @@ export default function (server) {
                         if (res[i]._source['status'] === 0) {
                             data.status = 'Completed';
                             data.status_color = 'blue';
-                        } else if (res[i]._source['status'] === -1) {
+                        } else if (res[i]._source['status'] === -1 || res[i]._source['status'] > 0) {
                             data.status = 'Failed';
                             data.status_color = 'red';
+                            if (res[i]._source['reason']) {
+                                data.reason = res[i]._source['reason'];
+                            }
                         }
 
                     } else if (res[i]._source['event'] === 'stampede.job.info') {

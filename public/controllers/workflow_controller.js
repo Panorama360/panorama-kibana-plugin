@@ -355,6 +355,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
                 }
 
                 $scope.job_xfer.total_bytes = $scope.job_xfer.total_bytes.toFixed(2);
+                $scope.job_xfer.effective_duration = $scope.job_xfer.effective_duration.toFixed(2);
 
                 let Vis = Private(VisProvider);
 

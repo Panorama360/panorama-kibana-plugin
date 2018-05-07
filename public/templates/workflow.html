@@ -76,7 +76,10 @@
                                 {{workflow.makespan}}s
                             </div>
                             <div class="item">
-                                <div class="ui {{workflow.status_color}} small label">{{workflow.status}}</div>
+                                <div class="ui {{workflow.status_color}} small label">
+                                    {{workflow.status}}
+                                    <div class="inverted detail" ng-if="workflow.reason">{{workflow.reason}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
