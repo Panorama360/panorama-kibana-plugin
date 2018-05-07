@@ -141,6 +141,8 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
         if ($job_type === 'compute') {
             // compute jobs
             $http.get('../api/panorama/get/job/series/' + $wf_id + '/' + $job_id + '/' + $job_type).then((response) => {
+                $scope.showWorkflowTimeSeries = false;
+
                 $scope.job_series = response.data;
 
                 let stime_series = [{x: 0, y: 0}];
@@ -288,7 +290,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
                 $scope.thread.params.addTooltip = false;
                 $scope.thread.params.addLegend = false;
                 $scope.thread.params.drawLinesBetweenPoints = true;
-                $scope.thread.params.valueAxes[0].title.text = 'Time (s)';
+                $scope.thread.params.valueAxes[0].title.text = '# Threads';
 
                 // gauge CPU
                 let avg_cpu = 0;
@@ -452,4 +454,151 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
         }
         $('.itt').popup();
     };
+
+    $scope.GetWorkflowTimeSeries = function ($wf_id, $wf_start, $wf_end) {
+
+        $scope.showJobTimeSeries = false;
+        $scope.showJobXfer = false;
+
+        if (!$wf_end || $wf_end === 0) {
+            $wf_end = Date.now();
+        }
+        let bin_size = parseInt(($wf_end - $wf_start) / 50);
+
+        $http.get('../api/panorama/get/wf/series/' + $wf_id + '/' + $wf_start + '/' + bin_size).then((response) => {
+            $scope.wf_series = response.data;
+
+            let thread_series = [{x: 0, y: 0}];
+            let rchar_series = [{x: 0, y: 0}];
+            let wchar_series = [{x: 0, y: 0}];
+            let xfer_series = [{x: 0, y: 0}];
+            let crchar_series = [{x: 0, y: 0}];
+            let cwchar_series = [{x: 0, y: 0}];
+            let cxfer_series = [{x: 0, y: 0}];
+            let prev_crchar = 0;
+            let prev_cwchar = 0;
+            let prev_xfer = 0;
+
+            for (let i = 0; i <= $wf_end - $wf_start; i += bin_size) {
+                let zero_series = {x: i, y: 0};
+
+                if (i in $scope.wf_series) {
+                    thread_series.push({
+                        x: i,
+                        y: $scope.wf_series[i].threads
+                    });
+                    crchar_series.push({
+                        x: i,
+                        y: $scope.wf_series[i].crchar > -1 ? $scope.wf_series[i].crchar / 1024 / 1024 : prev_crchar,
+                    });
+                    cwchar_series.push({
+                        x: i,
+                        y: $scope.wf_series[i].cwchar > -1 ? $scope.wf_series[i].cwchar / 1024 / 1024 : prev_cwchar,
+                    });
+                    cxfer_series.push({
+                        x: i,
+                        y: $scope.wf_series[i].cxfer > -1 ? $scope.wf_series[i].cxfer / 1024 / 1024 : prev_xfer,
+                    });
+                    if ($scope.wf_series[i].crchar > 0) {
+                        prev_crchar = $scope.wf_series[i].crchar / 1024 / 1024;
+                        prev_cwchar = $scope.wf_series[i].cwchar / 1024 / 1024;
+                    }
+                    if ($scope.wf_series[i].cxfer > 0) {
+                        prev_xfer = $scope.wf_series[i].cxfer / 1024 / 1024;
+                    }
+
+                } else {
+                    thread_series.push(zero_series);
+                    crchar_series.push({x: i, y: prev_crchar,});
+                    cwchar_series.push({x: i, y: prev_cwchar,});
+                    cxfer_series.push({x: i, y: prev_xfer})
+                }
+                if (i > 0) {
+                    if (i in $scope.wf_series) {
+                        rchar_series.push({x: i, y: $scope.wf_series[i].rchar / 1024 / 1024,});
+                        wchar_series.push({x: i, y: $scope.wf_series[i].wchar / 1024 / 1024,});
+                        xfer_series.push({x: i, y: $scope.wf_series[i].xfer / 1024 / 1024,});
+
+                    } else {
+                        rchar_series.push(zero_series);
+                        wchar_series.push(zero_series);
+                        xfer_series.push(zero_series);
+                    }
+                }
+            }
+
+            let Vis = Private(VisProvider);
+
+            // threads
+            $scope.workflowThreadsData = {
+                xAxisLabel: 'Job Makespan (s)',
+                series: [
+                    {
+                        label: 'threads',
+                        values: thread_series
+                    }
+                ]
+            };
+            $scope.workflowThreads = new Vis('panorama');
+            $scope.workflowThreads.params.type = 'line';
+            $scope.workflowThreads.params.addTooltip = false;
+            $scope.workflowThreads.params.addLegend = false;
+            $scope.workflowThreads.params.drawLinesBetweenPoints = true;
+            $scope.workflowThreads.params.valueAxes[0].title.text = '# Threads';
+
+            // bytes read/written
+            $scope.workflowBytesData = {
+                xAxisLabel: 'Steps (s)',
+                series: [
+                    {
+                        label: 'bytes read',
+                        values: rchar_series
+                    },
+                    {
+                        label: 'bytes written',
+                        values: wchar_series
+                    },
+                    {
+                        label: 'bytes transferred',
+                        values: xfer_series
+                    }
+                ]
+            };
+            $scope.workflowBytes = new Vis('panorama');
+            $scope.workflowBytes.params.type = 'histogram';
+            $scope.workflowBytes.params.mode = 'normal';
+            $scope.workflowBytes.params.addTooltip = false;
+            $scope.workflowBytes.params.legendPosition = 'bottom';
+            $scope.workflowBytes.params.valueAxes[0].title.text = 'Megabytes';
+
+            // cumulative bytes read/written
+            $scope.workflowCumulBytesData = {
+                xAxisLabel: 'Job Makespan (s)',
+                series: [
+                    {
+                        label: 'bytes read',
+                        values: crchar_series
+                    },
+                    {
+                        label: 'bytes written',
+                        values: cwchar_series
+                    },
+                    {
+                        label: 'bytes transferred',
+                        values: cxfer_series
+                    }
+                ]
+            };
+            $scope.workflowCumulBytes = new Vis('panorama');
+            $scope.workflowCumulBytes.params.type = 'area';
+            $scope.workflowCumulBytes.params.mode = 'stacked';
+            $scope.workflowCumulBytes.params.addTooltip = false;
+            $scope.workflowCumulBytes.params.legendPosition = 'bottom';
+            $scope.workflowCumulBytes.params.valueAxes[0].title.text = 'Megabytes';
+
+            $scope.showWorkflowTimeSeries = true;
+        });
+
+        $('.itt').popup();
+    }
 });

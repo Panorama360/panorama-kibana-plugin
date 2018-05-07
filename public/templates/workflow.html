@@ -102,6 +102,11 @@
                                 </div>
                             </div>
                         </div>
+
+                        <button class="ui teal small button"
+                                ng-click="GetWorkflowTimeSeries(workflow.wf_id, workflow.start_ts, workflow.end_ts)">
+                            <i class="chart area icon"></i> Time series
+                        </button>
                     </div>
 
                     <div class="ui grey segment" id="wf-job-characteristics" ng-show="showJobCharacteristics">
@@ -419,6 +424,76 @@
                             </div>
                         </div>
                     </div>
+
+
+                    <!-- Workflow Time Series -->
+                    <div class="ui teal segment" ng-show="showWorkflowTimeSeries">
+                        <h4 class="ui small header" style="margin-top: 1em">
+                            Workflow Characteristics: Time Series
+                        </h4>
+                        <a class="ui top right attached small label"
+                           ng-click="showWorkflowTimeSeries = !showWorkflowTimeSeries">
+                            <i class="white close icon small itt" data-content="Hide panel"
+                               data-variation="mini"></i>
+                        </a>
+
+                        <div class="ui grid">
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            CPU Utilization
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showWorkflowTimeSeries" vis="workflowCPU"
+                                                           vis-data="workflowCPUData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Number of Compute Threads
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showWorkflowTimeSeries" vis="workflowThreads"
+                                                           vis-data="workflowThreadsData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Bytes Read/Written
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showWorkflowTimeSeries" vis="workflowBytes"
+                                                           vis-data="workflowBytesData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <div class="ui segment">
+                                        <h4 class="ui small center aligned grey header">
+                                            Cumulative Bytes Read/Written
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showWorkflowTimeSeries" vis="workflowCumulBytes"
+                                                           vis-data="workflowCumulBytesData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

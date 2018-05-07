@@ -77,26 +77,28 @@ export default function (server) {
                     'wf_id': request.params.wf_id,
                     'wf_label': request.params.wf_label,
                     'start': 0,
+                    'start_ts': 0,
                     'end': 0,
+                    'end_ts': 0,
                     'makespan': 0,
                     'status': 'Running',
                     'status_color': 'green',
                     'jobs': []
                 };
                 let res = response.hits.hits;
-                let start = 0;
                 let end = 0;
 
                 for (let i = 0, len = res.length; i < len; i++) {
 
                     if (res[i]._source['event'] === 'stampede.xwf.start') {
-                        start = res[i]._source['ts'];
-                        data.start = new Date(start * 1000).toLocaleString();
+                        data.start_ts = res[i]._source['ts'];
+                        data.start = new Date(data.start_ts * 1000).toLocaleString();
 
                     } else if (res[i]._source['event'] === 'stampede.xwf.end') {
                         end = res[i]._source['ts'];
-                        data.makespan = (parseInt(end) - parseInt(start)).toLocaleString(undefined);
+                        data.makespan = (parseInt(end) - parseInt(data.start_ts)).toLocaleString(undefined);
                         data.end = new Date(end * 1000).toLocaleString();
+                        data.end_ts = end;
 
                         if (res[i]._source['status'] === 0) {
                             data.status = 'Completed';
@@ -205,6 +207,122 @@ export default function (server) {
                     }
                 }
                 reply(data);
+            })
+        }
+    });
+
+    server.route({
+        path: '/api/panorama/get/wf/series/{wf_id}/{wf_start}/{bin_size}',
+        method: 'GET',
+        handler(request, reply) {
+            const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
+            callWithRequest(request, 'search', {
+                index: 'panorama_kickstart',
+                size: 1000,
+                body: {
+                    query: {
+                        bool: {
+                            should: [
+                                {match: {'wf_uuid': request.params.wf_id}},
+                                {match: {'event': 'kickstart.inv.online'}}
+                            ],
+                            minimum_should_match: 2,
+                            boost: 1.0
+                        }
+                    },
+                    sort: {"@timestamp": "asc"}
+                }
+            }).then(response => {
+                let data = {};
+                let start_time = request.params.wf_start;
+                let crchar = 0;
+                let cwchar = 0;
+                let prev_iowait = 0;
+
+                for (let i = 0, len = response.hits.hits.length; i < len; i++) {
+                    let res = response.hits.hits[i];
+                    let curr_time = parseInt((res._source['ts'] - start_time) / request.params.bin_size) * request.params.bin_size;
+
+                    if (data[curr_time] === undefined) {
+                        data[curr_time] = {
+                            cpu: [],
+                            threads: 0,
+                            rchar: 0,
+                            wchar: 0,
+                            crchar: 0,
+                            cwchar: 0,
+                            iowait: 0,
+                            transferred: 0,
+                            ctransferred: 0
+                        };
+                    }
+                    data[curr_time].cpu.push(res._source['utime'] / (res._source['utime'] + res._source['stime']));
+                    data[curr_time].threads += res._source['threads'];
+                    data[curr_time].rchar += res._source['rchar'];
+                    data[curr_time].wchar += res._source['wchar'];
+                    crchar += res._source['rchar'];
+                    cwchar += res._source['wchar'];
+                    data[curr_time].crchar = crchar;
+                    data[curr_time].cwchar = cwchar;
+                    data[curr_time].iowait += res._source['iowait'] - prev_iowait;
+                    prev_iowait = res._source['iowait'];
+                }
+
+                // get transferred data
+                callWithRequest(request, 'search', {
+                    index: 'panorama_transfer',
+                    size: 1000,
+                    body: {
+                        query: {
+                            bool: {
+                                should: [
+                                    {match: {'wf_uuid': request.params.wf_id}},
+                                    {match: {'event': 'transfer.inv.go'}},
+                                    {match: {'status': 'SUCCEEDED'}}
+                                ],
+                                minimum_should_match: 3,
+                                boost: 1.0
+                            }
+                        },
+                        sort: {"@timestamp": "asc"}
+                    }
+
+                }).then(response => {
+                    let cum_bytes_transferred = 0;
+
+                    for (let i = 0, len = response.hits.hits.length; i < len; i++) {
+                        let res = response.hits.hits[i];
+                        let ts = new Date(res._source['@timestamp']).getTime() / 1000;
+                        let curr_time = parseInt((ts - start_time) / request.params.bin_size) * request.params.bin_size;
+
+                        let transfer_events = res._source['transfer_events'];
+
+                        for (let j = 0; j < transfer_events.length; j++) {
+                            if (transfer_events[j].code === 'PROGRESS') {
+                                let details = JSON.parse(transfer_events[j].details);
+                                if (data[curr_time] === undefined) {
+                                    data[curr_time] = {
+                                        cpu: [],
+                                        threads: 0,
+                                        rchar: 0,
+                                        wchar: 0,
+                                        crchar: -1,
+                                        cwchar: -1,
+                                        iowait: 0,
+                                        xfer: 0,
+                                        cxfer: 0
+                                    };
+                                }
+                                data[curr_time].xfer = details.bytes_transferred;
+                                cum_bytes_transferred += details.bytes_transferred;
+                                data[curr_time].cxfer = cum_bytes_transferred;
+                                break;
+                            }
+                        }
+                    }
+                    // console.log(data);
+                    reply(data);
+                })
             })
         }
     });
