@@ -95,7 +95,7 @@ export default function (server) {
 
                     } else if (res[i]._source['event'] === 'stampede.xwf.end') {
                         end = res[i]._source['ts'];
-                        data.makespan = parseInt(end) - parseInt(start);
+                        data.makespan = (parseInt(end) - parseInt(start)).toLocaleString(undefined);
                         data.end = new Date(end * 1000).toLocaleString();
 
                         if (res[i]._source['status'] === 0) {
