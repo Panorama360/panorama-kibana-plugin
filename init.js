@@ -121,7 +121,7 @@ export default function (server) {
                             }
                         }
                         if (!job) {
-                            job = {'job_id': job_id, status: 0, parents: [], children: []};
+                            job = {job_id: job_id, status: 0, parents: [], children: []};
                             data.jobs.push(job);
                         }
                         job.type = res[i]._source['type_desc'];
@@ -143,7 +143,7 @@ export default function (server) {
                         }
                         if (parentNotSet) {
                             data.jobs.push({
-                                'job_id': parent,
+                                job_id: parent,
                                 status: 0,
                                 parents: [],
                                 children: [child]
@@ -151,7 +151,7 @@ export default function (server) {
                         }
                         if (childNotSet) {
                             data.jobs.push({
-                                'job_id': child,
+                                job_id: child,
                                 status: 0,
                                 parents: [parent],
                                 children: []
@@ -160,6 +160,7 @@ export default function (server) {
 
                     } else if (res[i]._source['event'] === 'stampede.job_inst.main.start') {
                         let job_id = res[i]._source['job__id'];
+                        let sched_id = res[i]._source['sched__id'];
                         let job = null;
                         for (let j = 0, len = data.jobs.length; j < len; j++) {
                             if (data.jobs[j].job_id === job_id) {
@@ -168,11 +169,12 @@ export default function (server) {
                             }
                         }
                         if (!job) {
-                            job = {'job_id': job_id, status: 2, parents: [], children: []};
+                            job = {job_id: job_id, status: 2, parents: [], children: []};
                             data.jobs.push(job);
                         } else if (job.status < 2) {
                             job.status = 2;
                         }
+                        job.sched_id = sched_id;
 
                     } else if (res[i]._source['event'] === 'stampede.inv.end') {
                         let job_id = res[i]._source['job__id'];
@@ -328,7 +330,7 @@ export default function (server) {
     });
 
     server.route({
-        path: '/api/panorama/get/job/{wf_id}/{job_id}/{job_type}',
+        path: '/api/panorama/get/job/{wf_id}/{job_id}/{job_type}/{sched_id}',
         method: 'GET',
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
@@ -339,9 +341,11 @@ export default function (server) {
                     query: {
                         bool: {
                             should: [
+                                {match: {'event': 'stampede.inv.end'}},
                                 {match: {'xwf__id': request.params.wf_id}},
                                 {match: {'job__id': request.params.job_id}},
-                                {match: {'event': 'stampede.inv.end'}}
+                                {match: {'event': 'stampede.task.monitoring'}},
+                                {match: {'sched__id': request.params.sched_id}},
                             ],
                             minimum_should_match: 3,
                             boost: 1.0
@@ -353,17 +357,29 @@ export default function (server) {
                 let res = response.hits.hits;
                 let data = {
                     job_id: request.params.job_id,
+                    sched_id: request.params.sched_id,
                     wf_id: request.params.wf_id,
                     type: request.params.job_type,
                     remote_cpu_time: 0
                 };
 
                 for (let i = 0, len = res.length; i < len; i++) {
-                    if (res[i]._source['inv__id'] >= 0) {
+                    if (res[i]._source['event'] === 'stampede.inv.end' && res[i]._source['inv__id'] >= 0) {
                         data.executable = res[i]._source['executable'];
                         data.duration = parseFloat(res[i]._source['dur']);
                         data.remote_cpu_time = parseFloat(res[i]._source['remote_cpu_time']);
                         data.exit_code = res[i]._source['exitcode'];
+
+                    } else if (res[i]._source['event'] === 'stampede.task.monitoring') {
+                        data.io = {
+                            nprocs: res[i]._source['nprocs'],
+                            runtime: res[i]._source['run_time'],
+                            posix_agg_perf: res[i]._source['POSIX_module_data']['agg_perf_by_slowest'].toFixed(2),
+                            posix_total_mbytes: (res[i]._source['POSIX_module_data']['total_bytes'] / 1000).toFixed(2),
+                            stdio_agg_perf: res[i]._source['STDIO_module_data']['agg_perf_by_slowest'].toFixed(2),
+                            stdio_total_mbytes: (res[i]._source['STDIO_module_data']['total_bytes'] / 1000).toFixed(2),
+                            // TODO: add support to MPIIO
+                        }
                     }
                 }
                 reply(data);
@@ -372,7 +388,7 @@ export default function (server) {
     });
 
     server.route({
-        path: '/api/panorama/get/job/series/{wf_id}/{job_id}/{job_type}',
+        path: '/api/panorama/get/job/series/{wf_id}/{job_id}/{job_type}/{sched_id}',
         method: 'GET',
         handler(request, reply) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');

@@ -31,6 +31,7 @@ app.factory('workflowGraph', ['$q', '$rootScope', function ($q, $rootScope) {
                 group: 'nodes',
                 data: {
                     id: job.job_id,
+                    sched_id: job.sched_id,
                     wf_id: workflow.wf_id,
                     name: job.job_id,
                     type: job.type,
@@ -127,7 +128,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
     timefilter.enableAutoRefreshSelector();
 
     $rootScope.GetMonitorDJobInfo = function ($job) {
-        $http.get('../api/panorama/get/job/' + $job.wf_id + '/' + $job.id + '/' + $job.type).then((response) => {
+        $http.get('../api/panorama/get/job/' + $job.wf_id + '/' + $job.id + '/' + $job.type + '/' + $job.sched_id).then((response) => {
             $scope.job = response.data;
             $scope.showJobCharacteristics = true;
             $scope.showJobTimeSeries = false;
@@ -136,11 +137,11 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
         $('.itt').popup();
     };
 
-    $scope.GetJobTimeSeries = function ($job_id, $job_type, $job_duration, $wf_id) {
+    $scope.GetJobTimeSeries = function ($job_id, $job_type, $job_duration, $wf_id, $sched_id) {
 
         if ($job_type === 'compute') {
             // compute jobs
-            $http.get('../api/panorama/get/job/series/' + $wf_id + '/' + $job_id + '/' + $job_type).then((response) => {
+            $http.get('../api/panorama/get/job/series/' + $wf_id + '/' + $job_id + '/' + $job_type + '/' + $sched_id).then((response) => {
                 $scope.showWorkflowTimeSeries = false;
 
                 $scope.job_series = response.data;
