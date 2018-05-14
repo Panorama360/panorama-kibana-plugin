@@ -367,7 +367,7 @@ export default function (server) {
                     if (res[i]._source['event'] === 'stampede.inv.end' && res[i]._source['inv__id'] >= 0) {
                         data.executable = res[i]._source['executable'];
                         data.duration = parseFloat(res[i]._source['dur']);
-                        data.remote_cpu_time = parseFloat(res[i]._source['remote_cpu_time']);
+                        data.remote_cpu_time = parseFloat(res[i]._source['remote_cpu_time']).toFixed(3);
                         data.exit_code = res[i]._source['exitcode'];
 
                     } else if (res[i]._source['event'] === 'stampede.task.monitoring') {

@@ -41,6 +41,28 @@
                     </div>
                 </div>
                 <div class="eight wide column">
+
+                    <!-- Options Menu -->
+                    <div class="ui grey small menu" style="display: flex;">
+                        <span class="item">
+                            Workflow Status
+                            <div class="ui {{workflow.status_color}} small left pointing label">{{workflow.status}}</div>
+                        </span>
+
+                        <span class="active item">
+                            Time Series Analysis
+                        </span>
+
+                        <a class="item"
+                           ng-click="GetWorkflowTimeSeries(workflow.wf_id, workflow.start_ts, workflow.end_ts)">
+                            <i class="icon chart bar"></i> Workflow</a>
+
+                        <a class="item" ng-show="showJobCharacteristics"
+                           ng-click="GetJobTimeSeries(job.job_id, job.type, job.duration, job.wf_id, job.sched_id)">
+                            <i class="icon chart line"></i> Job</a>
+                    </div>
+
+                    <!-- Workflow Characteristics -->
                     <div class="ui blue segment" id="wf-characteristics" ng-show="showWfCharacteristics">
                         <h4 class="ui small header">
                             Workflow Characteristics
@@ -95,20 +117,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="item">
+                            <div class="item" ng-if="workflow.reason">
                                 <div class="ui {{workflow.status_color}} small label">
                                     {{workflow.status}}
                                     <div class="inverted detail" ng-if="workflow.reason">{{workflow.reason}}</div>
                                 </div>
                             </div>
                         </div>
-
-                        <button class="ui teal small button"
-                                ng-click="GetWorkflowTimeSeries(workflow.wf_id, workflow.start_ts, workflow.end_ts)">
-                            <i class="chart area icon"></i> Time series
-                        </button>
                     </div>
 
+                    <!-- Job Characteristics -->
                     <div class="ui grey segment" id="wf-job-characteristics" ng-show="showJobCharacteristics">
                         <h4 class="ui small header">
                             Job Characteristics
@@ -206,10 +224,10 @@
                                             </div>
                                         </div>
                                         <div class="item">
-                                            <i class="database icon itt" data-content="POSIX Total Data"
+                                            <i class="database icon itt" data-content="POSIX I/O Total Data"
                                                data-variation="small"></i>
                                             <div class="content">
-                                                <span class="header">POSIX Total Data</span>
+                                                <span class="header">POSIX I/O Total Data</span>
                                                 <div class="description">
                                                     {{job.io.posix_total_mbytes}} MB
                                                 </div>
@@ -249,11 +267,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <button class="ui teal small button"
-                                ng-click="GetJobTimeSeries(job.job_id, job.type, job.duration, job.wf_id, job.sched_id)">
-                            <i class="chart area icon"></i> Time series
-                        </button>
                     </div>
                 </div>
             </div>
@@ -265,8 +278,8 @@
 
                     <!-- Compute Job Time Series -->
                     <div class="ui teal segment" ng-show="showJobTimeSeries">
-                        <h4 class="ui small header" style="margin-top: 1em">
-                            Job Characteristics: Time Series
+                        <h4 class="ui header" style="margin-top: 1em">
+                            Time Series Analysis: Job Characteristics
                         </h4>
                         <a class="ui top right attached small label"
                            ng-click="showJobTimeSeries = !showJobTimeSeries">

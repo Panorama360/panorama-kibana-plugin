@@ -458,6 +458,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
 
     $scope.GetWorkflowTimeSeries = function ($wf_id, $wf_start, $wf_end) {
 
+        $scope.showJobCharacteristics = false;
         $scope.showJobTimeSeries = false;
         $scope.showJobXfer = false;
 
