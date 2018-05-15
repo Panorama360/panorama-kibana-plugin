@@ -139,62 +139,65 @@
                         <div class="ui grid">
                             <div class="row" style="margin-left: 0">
                                 <div class="eight wide column">
-                                    <div class="ui divided small list">
-                                        <div class="item">
-                                            <i class="id card icon itt" data-content="Job ID"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Job ID</span>
-                                                <div class="description">
-                                                    {{job.job_id}}
+                                    <div class="ui segment">
+                                        <div class="ui divided small list">
+                                            <div class="item">
+                                                <i class="id card icon itt" data-content="Job ID"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Job ID</span>
+                                                    <div class="description">
+                                                        {{job.job_id}}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="th icon itt" data-content="Executable" data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Executable</span>
-                                                <div class="description">
-                                                    {{job.executable}}
+                                            <div class="item">
+                                                <i class="th icon itt" data-content="Executable"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Executable</span>
+                                                    <div class="description">
+                                                        {{job.executable}}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="tag icon itt" data-content="Type" data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Type</span>
-                                                <div class="description">
-                                                    {{job.type}}
+                                            <div class="item">
+                                                <i class="tag icon itt" data-content="Type" data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Type</span>
+                                                    <div class="description">
+                                                        {{job.type}}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item" ng-if="job.duration">
-                                            <i class="clock icon itt" data-content="Duration"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Duration</span>
-                                                <div class="description">
-                                                    {{job.duration}}s
+                                            <div class="item" ng-if="job.duration">
+                                                <i class="clock icon itt" data-content="Duration"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Duration</span>
+                                                    <div class="description">
+                                                        {{job.duration}}s
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item" ng-if="job.remote_cpu_time">
-                                            <i class="clock outline icon itt" data-content="Remote CPU Time"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Remote CPU Time</span>
-                                                <div class="description">
-                                                    {{job.remote_cpu_time}}s
+                                            <div class="item" ng-if="job.remote_cpu_time">
+                                                <i class="clock outline icon itt" data-content="Remote CPU Time"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Remote CPU Time</span>
+                                                    <div class="description">
+                                                        {{job.remote_cpu_time}}s
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item" ng-if="job.exit_code">
-                                            <i class="check circle outline icon itt" data-content="Exit Code"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Exit Code</span>
-                                                <div class="description">
-                                                    {{job.exit_code}}
+                                            <div class="item" ng-if="job.exit_code">
+                                                <i class="check circle outline icon itt" data-content="Exit Code"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Exit Code</span>
+                                                    <div class="description">
+                                                        {{job.exit_code}}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -202,64 +205,66 @@
                                 </div>
 
                                 <div class="eight wide column" ng-if="job.io">
-                                    <div class="ui divided small list">
-                                        <div class="item">
-                                            <i class="microchip icon itt" data-content="Number of MPI Processes"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Number of MPI Processes</span>
-                                                <div class="description">
-                                                    {{job.io.nprocs}}
+                                    <div class="ui segment">
+                                        <div class="ui divided small list">
+                                            <div class="item">
+                                                <i class="microchip icon itt" data-content="Number of MPI Processes"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Number of MPI Processes</span>
+                                                    <div class="description">
+                                                        {{job.io.nprocs}}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="hourglass icon itt" data-content="Runtime"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">Runtime</span>
-                                                <div class="description">
-                                                    {{job.io.runtime}}s
+                                            <div class="item">
+                                                <i class="hourglass icon itt" data-content="Runtime"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">Runtime</span>
+                                                    <div class="description">
+                                                        {{job.io.runtime}}s
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="database icon itt" data-content="POSIX I/O Total Data"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">POSIX I/O Total Data</span>
-                                                <div class="description">
-                                                    {{job.io.posix_total_mbytes}} MB
+                                            <div class="item">
+                                                <i class="database icon itt" data-content="POSIX I/O Total Data"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">POSIX I/O Total Data</span>
+                                                    <div class="description">
+                                                        {{job.io.posix_total_mbytes}} MB
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="chart bar icon itt" data-content="POSIX Performance"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">POSIX Performance</span>
-                                                <div class="description">
-                                                    {{job.io.posix_agg_perf}} MiB/s
+                                            <div class="item">
+                                                <i class="chart bar icon itt" data-content="POSIX Performance"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">POSIX Performance</span>
+                                                    <div class="description">
+                                                        {{job.io.posix_agg_perf}} MiB/s
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="database icon itt" data-content="STDIO Total Data"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">STDIO Total Data</span>
-                                                <div class="description">
-                                                    {{job.io.stdio_total_mbytes}} MB
+                                            <div class="item">
+                                                <i class="database icon itt" data-content="STDIO Total Data"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">STDIO Total Data</span>
+                                                    <div class="description">
+                                                        {{job.io.stdio_total_mbytes}} MB
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="item">
-                                            <i class="chart bar icon itt" data-content="STDIO Performance"
-                                               data-variation="small"></i>
-                                            <div class="content">
-                                                <span class="header">STDIO Performance</span>
-                                                <div class="description">
-                                                    {{job.io.stdio_agg_perf}} MiB/s
+                                            <div class="item">
+                                                <i class="chart bar icon itt" data-content="STDIO Performance"
+                                                   data-variation="small"></i>
+                                                <div class="content">
+                                                    <span class="header">STDIO Performance</span>
+                                                    <div class="description">
+                                                        {{job.io.stdio_agg_perf}} MiB/s
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

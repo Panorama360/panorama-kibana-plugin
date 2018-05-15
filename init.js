@@ -75,16 +75,16 @@ export default function (server) {
                 }
             }).then(response => {
                 let data = {
-                    'wf_id': request.params.wf_id,
-                    'wf_label': request.params.wf_label,
-                    'start': 0,
-                    'start_ts': 0,
-                    'end': 0,
-                    'end_ts': 0,
-                    'makespan': 0,
-                    'status': 'Running',
-                    'status_color': 'green',
-                    'jobs': []
+                    wf_id: request.params.wf_id,
+                    wf_label: request.params.wf_label,
+                    start: 0,
+                    start_ts: 0,
+                    end: 0,
+                    end_ts: 0,
+                    makespan: 0,
+                    status: 'Running',
+                    status_color: 'green',
+                    jobs: []
                 };
                 let res = response.hits.hits;
                 let end = 0;
@@ -94,6 +94,9 @@ export default function (server) {
                     if (res[i]._source['event'] === 'stampede.xwf.start') {
                         data.start_ts = res[i]._source['ts'];
                         data.start = new Date(data.start_ts * 1000).toLocaleString();
+                        data.status = 'Running';
+                        data.status_color = 'green';
+                        data.reason = '';
 
                     } else if (res[i]._source['event'] === 'stampede.xwf.end') {
                         end = res[i]._source['ts'];
