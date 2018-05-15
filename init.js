@@ -97,6 +97,7 @@ export default function (server) {
                         data.status = 'Running';
                         data.status_color = 'green';
                         data.reason = '';
+                        data.end = 0;
 
                     } else if (res[i]._source['event'] === 'stampede.xwf.end') {
                         end = res[i]._source['ts'];
@@ -247,10 +248,14 @@ export default function (server) {
 
                 for (let i = 0, len = response.hits.hits.length; i < len; i++) {
                     let res = response.hits.hits[i];
+                    let job_id = res._source['dag_job_id'];
                     let curr_time = parseInt((res._source['ts'] - start_time) / request.params.bin_size) * request.params.bin_size;
 
                     if (data[curr_time] === undefined) {
-                        data[curr_time] = {
+                        data[curr_time] = {};
+                    }
+                    if (data[curr_time][job_id] === undefined) {
+                        data[curr_time][job_id] = {
                             cpu: [],
                             threads: 0,
                             rchar: 0,
@@ -258,20 +263,21 @@ export default function (server) {
                             crchar: 0,
                             cwchar: 0,
                             iowait: 0,
+                            prev_iowait: 0,
                             transferred: 0,
                             ctransferred: 0
                         };
                     }
-                    data[curr_time].cpu.push(res._source['utime'] / (res._source['utime'] + res._source['stime']));
-                    data[curr_time].threads += res._source['threads'];
-                    data[curr_time].rchar += res._source['rchar'];
-                    data[curr_time].wchar += res._source['wchar'];
+                    data[curr_time][job_id].cpu.push(res._source['utime'] / (res._source['utime'] + res._source['stime']));
+                    data[curr_time][job_id].threads = Math.max(data[curr_time][job_id].threads, res._source['threads']);
+                    data[curr_time][job_id].rchar += res._source['rchar'];
+                    data[curr_time][job_id].wchar += res._source['wchar'];
                     crchar += res._source['rchar'];
                     cwchar += res._source['wchar'];
-                    data[curr_time].crchar = crchar;
-                    data[curr_time].cwchar = cwchar;
-                    data[curr_time].iowait += res._source['iowait'] - prev_iowait;
-                    prev_iowait = res._source['iowait'];
+                    data[curr_time][job_id].crchar = crchar;
+                    data[curr_time][job_id].cwchar = cwchar;
+                    data[curr_time][job_id].iowait = Math.max(data[curr_time][job_id].iowait, res._source['iowait'] - data[curr_time][job_id].prev_iowait);
+                    data[curr_time][job_id].prev_iowait = res._source['iowait'];
                 }
 
                 // get transferred data
@@ -298,6 +304,7 @@ export default function (server) {
 
                     for (let i = 0, len = response.hits.hits.length; i < len; i++) {
                         let res = response.hits.hits[i];
+                        let job_id = res._source['dag_job_id'];
                         let ts = new Date(res._source['@timestamp']).getTime() / 1000;
                         let curr_time = parseInt((ts - start_time) / request.params.bin_size) * request.params.bin_size;
 
@@ -307,26 +314,29 @@ export default function (server) {
                             if (transfer_events[j].code === 'PROGRESS') {
                                 let details = JSON.parse(transfer_events[j].details);
                                 if (data[curr_time] === undefined) {
-                                    data[curr_time] = {
+                                    data[curr_time] = {};
+                                }
+                                if (data[curr_time][job_id] === undefined) {
+                                    data[curr_time][job_id] = {
                                         cpu: [],
                                         threads: 0,
                                         rchar: 0,
                                         wchar: 0,
-                                        crchar: -1,
-                                        cwchar: -1,
+                                        crchar: 0,
+                                        cwchar: 0,
                                         iowait: 0,
-                                        xfer: 0,
-                                        cxfer: 0
+                                        prev_iowait: 0,
+                                        transferred: 0,
+                                        ctransferred: 0
                                     };
                                 }
-                                data[curr_time].xfer = details.bytes_transferred;
+                                data[curr_time][job_id].xfer = details.bytes_transferred;
                                 cum_bytes_transferred += details.bytes_transferred;
-                                data[curr_time].cxfer = cum_bytes_transferred;
+                                data[curr_time][job_id].cxfer = cum_bytes_transferred;
                                 break;
                             }
                         }
                     }
-                    // console.log(data);
                     reply(data);
                 })
             })

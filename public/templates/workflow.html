@@ -582,6 +582,21 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="eight wide column">
+                                    <div class="ui segment" style="margin-left: 1em">
+                                        <h4 class="ui small center aligned grey header">
+                                            Avg. I/O Wait per Thread
+                                        </h4>
+                                        <div class="panorama-visualization">
+                                            <visualization ng-if="showWorkflowTimeSeries" vis="workflowIOwait"
+                                                           vis-data="workflowIOwaitData" style="height: 300px">
+                                            </visualization>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
