@@ -6,6 +6,7 @@ export default function (server) {
             const {callWithRequest} = server.plugins.elasticsearch.getCluster('data');
             callWithRequest(request, 'search', {
                 index: 'panorama_stampede',
+                size: 100,
                 body: {
                     query: {
                         bool: {
