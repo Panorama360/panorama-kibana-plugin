@@ -172,15 +172,15 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
                     });
                     crchar_series.push({
                         x: $scope.job_series.records[i].step,
-                        y: $scope.job_series.records[i].crchar / 1024 / 1024,
+                        y: $scope.job_series.records[i].crchar / 1e6,
                     });
                     cwchar_series.push({
                         x: $scope.job_series.records[i].step,
-                        y: $scope.job_series.records[i].cwchar / 1024 / 1024,
+                        y: $scope.job_series.records[i].cwchar / 1e6,
                     });
                     iowait_series.push({
                         x: $scope.job_series.records[i].step,
-                        y: $scope.job_series.records[i].iowait / $scope.job_series.records[i].threads / 1000000,
+                        y: $scope.job_series.records[i].iowait / 1e6,
                     });
                     thread_series.push({
                         x: $scope.job_series.records[i].step,
@@ -189,11 +189,11 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
                     if (i > 0) {
                         rchar_series.push({
                             x: $scope.job_series.records[i].step,
-                            y: $scope.job_series.records[i].rchar / 1024 / 1024,
+                            y: $scope.job_series.records[i].rchar / 1e6,
                         });
                         wchar_series.push({
                             x: $scope.job_series.records[i].step,
-                            y: $scope.job_series.records[i].wchar / 1024 / 1024,
+                            y: $scope.job_series.records[i].wchar / 1e6,
                         });
                         cpu_series.push($scope.job_series.records[i].cpu);
                     }
