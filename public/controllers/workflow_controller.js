@@ -536,8 +536,8 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
                         xfer += $scope.wf_series[i][job].xfer;
                     }
 
-                    cpu_series.usage.push({x: i, y: cpu_usage > 0 ? cpu_usage : 0});
-                    cpu_series.idle.push({x: i, y: cpu_idle > 0 ? cpu_idle : 0});
+                    cpu_series.usage.push({x: i, y: cpu_usage > 0 ? cpu_usage * 100 : 0});
+                    cpu_series.idle.push({x: i, y: cpu_idle > 0 ? cpu_idle * 100 : 0});
                     thread_series.push({x: i, y: threads});
                     crchar_series.push({x: i, y: crchar > -1 ? crchar / 1e6 : prev_crchar});
                     cwchar_series.push({x: i, y: cwchar > -1 ? cwchar / 1e6 : prev_cwchar});
