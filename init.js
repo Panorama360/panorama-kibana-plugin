@@ -389,9 +389,9 @@ export default function (server) {
                             nprocs: res[i]._source['nprocs'],
                             runtime: res[i]._source['run_time'],
                             posix_agg_perf: res[i]._source['POSIX_module_data']['agg_perf_by_slowest'].toFixed(2),
-                            posix_total_mbytes: (res[i]._source['POSIX_module_data']['total_bytes'] / 1000).toFixed(2),
+                            posix_total_mbytes: (res[i]._source['POSIX_module_data']['total_bytes'] / Math.pow(2,20)).toFixed(2),
                             stdio_agg_perf: res[i]._source['STDIO_module_data']['agg_perf_by_slowest'].toFixed(2),
-                            stdio_total_mbytes: (res[i]._source['STDIO_module_data']['total_bytes'] / 1000).toFixed(2),
+                            stdio_total_mbytes: (res[i]._source['STDIO_module_data']['total_bytes'] / Math.pow(2,20)).toFixed(2),
                             // TODO: add support to MPIIO
                         }
                     }
