@@ -117,7 +117,7 @@ app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootS
         $scope.workflow = response.data;
 
         if (!$scope.workflow.end || $scope.workflow.end === 0) {
-            $scope.workflow.makespan = ((Date.now() - new Date($scope.workflow.start)) / 1e3).toFixed(2);
+            $scope.workflow.makespan = ((Date.now() - $scope.workflow.start_ts*1000) / 1e3).toFixed(2);
         }
 
         $scope.showWfCharacteristics = true;
