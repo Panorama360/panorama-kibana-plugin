@@ -1,7 +1,7 @@
 {
-  "author": "Rafael Ferreira da Silva <rafsilva@isi.edu>",
+  "author": "Rafael Ferreira da Silva <rafsilva@isi.edu>, George Papadimitriou <georgpap@isi.edu>",
   "name": "panorama",
-  "version": "6.2.4",
+  "version": "7.4.2",
   "license": "Apache-2.0",
   "dependencies": {
     "cytoscape": "^3.2.11",

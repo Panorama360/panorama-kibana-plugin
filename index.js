@@ -12,23 +12,17 @@ export default function (kibana) {
                 description: 'Panorama 360 Kibana plugin',
                 order: -999,
                 icon: 'plugins/panorama/img/icon.png',
-                main: 'plugins/panorama/panorama_app',
-                uses: [
-                    'visTypes',
-                    'visResponseHandlers',
-                    'visRequestHandlers',
-                    'visEditorTypes',
-                    'savedObjectTypes',
-                    'spyModes',
-                    'fieldFormats',
-                ],
+                main: 'plugins/panorama/panorama_app'
+            }
+        },
 
-                injectVars: (server) => {
-                    return server.plugins.kibana.injectVars(server);
-                }
+        server: {
+            injectUiAppVars: (server) => {
+                return server.plugins.kibana.injectVars(server);
             }
         },
 
         init: require('./init.js')
     });
 };
+
