@@ -1,3 +1,13 @@
+import 'uiExports/visTypes';
+import 'uiExports/visResponseHandlers';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visEditorTypes';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/spyModes';
+import 'uiExports/fieldFormats';
+
+import { timefilter } from 'ui/timefilter';
+
 // CSS
 require('./panorama_app.less');
 require('./semantic/dist/semantic.min.css');
@@ -41,7 +51,7 @@ import {timezoneProvider} from 'ui/vis/lib/timezone';
 import {recentlyAccessed} from 'ui/persisted_log';
 
 
-app.controller('panorama', function ($scope, $http, kbnUrl, Private, timefilter) {
+app.controller('panorama', function ($scope, $http, kbnUrl, Private) {
 
     $http.get('../api/panorama/get/wf_ids').then((response) => {
         $scope.workflows = response.data.workflows;

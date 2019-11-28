@@ -2,6 +2,7 @@ import cytoscape from 'cytoscape';
 import 'ui/visualize';
 import {VisProvider} from 'ui/vis';
 import {getVisualizeLoader} from 'ui/visualize/loader';
+import { timefilter } from 'ui/timefilter';
 
 const app = require('ui/modules').get('apps/panorama', []);
 
@@ -106,7 +107,7 @@ app.factory('workflowGraph', ['$q', '$rootScope', function ($q, $rootScope) {
 }]);
 
 app.controller('workflow', function ($scope, $http, kbnUrl, $routeParams, $rootScope, workflowGraph, Private,
-                                     savedVisualizations, serviceSettings, timefilter) {
+                                     savedVisualizations, serviceSettings) {
 
     $scope.showWfCharacteristics = true;
     $scope.showJobCharacteristics = false;
