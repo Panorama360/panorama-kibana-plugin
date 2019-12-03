@@ -50,6 +50,8 @@ import {notify, fatalError, toastNotifications} from 'ui/notify';
 import {timezoneProvider} from 'ui/vis/lib/timezone';
 import {recentlyAccessed} from 'ui/persisted_log';
 
+import { Subscription } from 'rxjs';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 app.controller('panorama', function ($scope, $http, kbnUrl, Private) {
 
@@ -75,8 +77,34 @@ app.controller('panorama', function ($scope, $http, kbnUrl, Private) {
     };
 
     let refresher;
-    $scope.$watchCollection('timefilter.refreshInterval', function (interval) {
+
+    $scope.timefilterSubscriptions$ = new Subscription();
+    $scope.timefilterSubscriptions$.add(
+        subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+            next: () => {
+                interval = timefilter.getRefreshInterval()
+                console.log(interval)
+
+                if (interval.value > 0 && !interval.pause) {
+                    function startRefresh() {
+                        refresher = $timeout(function () {
+                            if (!$scope.running) $scope.search();
+                            startRefresh();
+                        }, interval.value);
+                    }
+                  
+                    startRefresh();
+                }
+            }
+        })
+    );
+
+    /*$scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
         if (refresher) $timeout.cancel(refresher);
+        
+        interval = timefilter.getRefreshInterval()
+        console.log(interval)
+
         if (interval.value > 0 && !interval.pause) {
             function startRefresh() {
                 refresher = $timeout(function () {
@@ -87,5 +115,5 @@ app.controller('panorama', function ($scope, $http, kbnUrl, Private) {
 
             startRefresh();
         }
-    });
+    });*/
 });
